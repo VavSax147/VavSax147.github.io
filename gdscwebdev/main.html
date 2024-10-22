@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang ='en'>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Statistics</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+    <header>
+        <img src="images/dlogo.png" class="brand">
+        <h2 class="logo">Dashboard</h2>
+        <nav class="navigation">
+            <a href="index.html" class="n">Home</a>
+            <a href="l"class="n">Settings</a>
+            <a href="l"class="n">Contact</a>
+            <button class="btnLogin-pop"><a href='index.html'class ='btn'>Logout</a></button>
+            
+        </nav>
+    </header>
+    <canvas id="lineChart"></canvas>
+
+    <p class="scp"><script>
+        // Initialize the chart data and configuration
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        const data = {
+            labels: [], // x-axis labels
+            datasets: [{
+                label: 'Live Data',
+                data: [], // y-axis data
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false
+            }]
+        };
+
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        }
+                    }
+                }
+            }
+        };
+
+        // Create the chart instance
+        const lineChart = new Chart(ctx, config);
+
+        // Connect to the socket.io server
+        const socket = io('https://data.gdscnsut.com');  // Replace with your actual server URL if needed
+
+        // Listen for incoming data from the server
+        socket.on('liveData', function(newData) {
+            // Assume the data is an object like { time: "2024-10-22T12:34:56", value: 45 }
+            const time = newData.time;  // Example: '2024-10-22T12:34:56'
+            const value = newData.value; // Example: 45
+
+            // Update the chart with new data
+            if (data.labels.length >= 20) {
+                // If the chart has more than 20 points, remove the first one
+                data.labels.shift();
+                data.datasets[0].data.shift();
+            }
+
+            // Add new time and value to the chart
+            data.labels.push(time);
+            data.datasets[0].data.push(value);
+
+            // Update the chart
+            lineChart.update();
+        });
+        </script></p>
+</body>
+</html>
